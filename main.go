@@ -70,10 +70,15 @@ var groupByAnimation bool
 var closeWhenDone bool
 func main() {
 	// Load config.ini, create it if it doesn't exist
-	cfg, err := ini.Load("config.ini")
+	ex, err := os.Executable()
     if err != nil {
-		ioutil.WriteFile("config.ini", []byte("# Crops sprites to their edges, set to false for original animation size\ncrop_sprites = true\n\n# Splits sprites by animation when possible\ngroup_by_animation = true\n\n# Close the program without prompting the user when done executing\nclose_when_done = false"), 0644)
-		cfg, err = ini.Load("config.ini")
+		exit(err.Error())
+	}
+	dirAbsPath := filepath.Dir(ex) + string(os.PathSeparator)
+	cfg, err := ini.Load(dirAbsPath + "config.ini")
+    if err != nil {
+		ioutil.WriteFile(dirAbsPath + "config.ini", []byte("# Crops sprites to their edges, set to false for original animation size\ncrop_sprites = true\n\n# Splits sprites by animation when possible\ngroup_by_animation = true\n\n# Close the program without prompting the user when done executing\nclose_when_done = false"), 0644)
+		cfg, err = ini.Load(dirAbsPath + "config.ini")
 		if err != nil {
 			exit("Could not make config.ini.")
 		}
@@ -127,11 +132,6 @@ func main() {
 	if err != nil {
 		exit(err.Error())
 	}
-	ex, err := os.Executable()
-    if err != nil {
-		exit(err.Error())
-	}
-	dirAbsPath := filepath.Dir(ex) + string(os.PathSeparator)
 	mainDir := spritePlist.Metadata.TextureFileName[0:len(spritePlist.Metadata.TextureFileName)-len(filepath.Ext(spritePlist.Metadata.TextureFileName))] + string(os.PathSeparator)
 	for key, element := range spritePlist.Frames {
 		fmt.Println(key)
