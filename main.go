@@ -92,7 +92,7 @@ func main() {
 	if(strings.HasSuffix(filename, ".png")) {
 		filename = filename[0:len(filename)-4] + ".plist"
 	} else if(strings.HasSuffix(filename, "_aniinfo.plist")) {
-		filename = filename[0:len(filename)-4] + ".plist"
+		filename = filename[0:len(filename)-14] + ".plist"
 	}
 	if _, err := os.Stat(filename); errors.Is(err, os.ErrNotExist) {
 		exit("Plist file not found.")
@@ -110,7 +110,6 @@ func main() {
 		exit(err.Error())
 	}
 	var spritePlist SpritePlist
-	var separator string
 	if formatCheck["metadata"]["format"] == uint64(3) {
 		var spritePlistFormat3 SpritePlistFormat3
 		_, err = plist.Unmarshal(plistFile, &spritePlistFormat3)
@@ -118,13 +117,11 @@ func main() {
 			exit(err.Error())
 		}
 		spritePlist = SpritePlist(spritePlistFormat3)
-		separator = ","
 	} else {
 		_, err = plist.Unmarshal(plistFile, &spritePlist)
 		if err != nil {
 			exit(err.Error())
 		}
-		separator = ", "
 	}
 	src, err := imaging.Open(dir + spritePlist.Metadata.TextureFileName)
 	if err != nil {
@@ -138,6 +135,12 @@ func main() {
 	mainDir := spritePlist.Metadata.TextureFileName[0:len(spritePlist.Metadata.TextureFileName)-len(filepath.Ext(spritePlist.Metadata.TextureFileName))] + string(os.PathSeparator)
 	for key, element := range spritePlist.Frames {
 		fmt.Println(key)
+		var separator string
+		if strings.Contains(element.Frame, ", ") {
+			separator = ", "
+		} else {
+			separator = ","
+		}
 		rect := strings.Split(strings.ReplaceAll(strings.ReplaceAll(element.Frame, "{", ""), "}", ""), separator)
 		var width int
 		var height int
