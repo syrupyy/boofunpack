@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"image"
 	"image/color"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -77,7 +76,7 @@ func main() {
 	dirAbsPath := filepath.Dir(ex) + string(os.PathSeparator)
 	cfg, err := ini.Load(dirAbsPath + "config.ini")
     if err != nil {
-		ioutil.WriteFile(dirAbsPath + "config.ini", []byte("# Crops sprites to their edges, set to false for original animation size\ncrop_sprites = true\n\n# Splits sprites by animation when possible\ngroup_by_animation = true\n\n# Close the program without prompting the user when done executing\nclose_when_done = false"), 0644)
+		os.WriteFile(dirAbsPath + "config.ini", []byte("# Crops sprites to their edges, set to false for original animation size\ncrop_sprites = true\n\n# Splits sprites by animation when possible\ngroup_by_animation = true\n\n# Close the program without prompting the user when done executing\nclose_when_done = false"), 0644)
 		cfg, err = ini.Load(dirAbsPath + "config.ini")
 		if err != nil {
 			exit("Could not make config.ini.")
@@ -105,7 +104,7 @@ func main() {
     dir := filepath.Dir(filename) + string(os.PathSeparator)
 
 	// Start ripping the actual plist
-	plistFile, err := ioutil.ReadFile(filename)
+	plistFile, err := os.ReadFile(filename)
 	if err != nil {
 		exit(err.Error())
 	}
@@ -211,7 +210,7 @@ func main() {
 			fmt.Println("Could not find animation list, skipping grouping...")
 			exit("Done!")
 		}
-		plistAniinfoFile, err := ioutil.ReadFile(plistAniinfoName)
+		plistAniinfoFile, err := os.ReadFile(plistAniinfoName)
 		if err != nil {
 			exit(err.Error())
 		}
@@ -229,21 +228,21 @@ func main() {
 			for i, frame := range element.FrameList {
 				frameFilename := spritePlistAniinfo.FrameList[frame]
 				if strings.Contains(frameFilename, "/") {
-					input, err := ioutil.ReadFile(dirAbsPath + frameFilename)
+					input, err := os.ReadFile(dirAbsPath + frameFilename)
 					if err != nil {
 						exit(err.Error())
 					}
-					err = ioutil.WriteFile(dirAbsPath + filepath.Dir(frameFilename) + string(os.PathSeparator) + strings.ReplaceAll(mainDir, string(os.PathSeparator), "_") + strings.ReplaceAll(key, " ", "_") + "_" + fmt.Sprintf("%04d", i + 1) + filepath.Ext(frameFilename), input, 0644)
+					err = os.WriteFile(dirAbsPath + filepath.Dir(frameFilename) + string(os.PathSeparator) + strings.ReplaceAll(mainDir, string(os.PathSeparator), "_") + strings.ReplaceAll(key, " ", "_") + "_" + fmt.Sprintf("%04d", i + 1) + filepath.Ext(frameFilename), input, 0644)
 					if err != nil {
 						exit(err.Error())
 					}
 					used = append(used, frameFilename)
 				} else {
-					input, err := ioutil.ReadFile(dirAbsPath + mainDir + frameFilename)
+					input, err := os.ReadFile(dirAbsPath + mainDir + frameFilename)
 					if err != nil {
 						exit(err.Error())
 					}
-					err = ioutil.WriteFile(dirAbsPath + mainDir + strings.ReplaceAll(mainDir, string(os.PathSeparator), "_") + strings.ReplaceAll(key, " ", "_") + "_" + fmt.Sprintf("%04d", i + 1) + filepath.Ext(frameFilename), input, 0644)
+					err = os.WriteFile(dirAbsPath + mainDir + strings.ReplaceAll(mainDir, string(os.PathSeparator), "_") + strings.ReplaceAll(key, " ", "_") + "_" + fmt.Sprintf("%04d", i + 1) + filepath.Ext(frameFilename), input, 0644)
 					if err != nil {
 						exit(err.Error())
 					}
