@@ -42,13 +42,13 @@ type SpritePlistFormat3 struct {
 		SourceSize      string `plist:"sourceSize"`
 	} `plist:"frames"`
 	Metadata struct {
-		Format              int    `plist:"format"`
+		Format int `plist:"format"`
 		//PixelFormat         string `plist:"pixelFormat"`
 		//PremultiplyAlpha    bool   `plist:"premultiplyAlpha"`
 		//RealTextureFileName string `plist:"realTextureFileName"`
-		Size                string `plist:"size"`
+		Size string `plist:"size"`
 		//Smartupdate         string `plist:"smartupdate"`
-		TextureFileName     string `plist:"textureFileName"`
+		TextureFileName string `plist:"textureFileName"`
 	} `plist:"metadata"`
 }
 
@@ -67,16 +67,17 @@ type SpritePlistAniinfo struct {
 var cropSprites bool
 var groupByAnimation bool
 var closeWhenDone bool
+
 func main() {
 	// Load config.ini, create it if it doesn't exist
 	ex, err := os.Executable()
-    if err != nil {
+	if err != nil {
 		exit(err.Error())
 	}
 	dirAbsPath := filepath.Dir(ex) + string(os.PathSeparator)
 	cfg, err := ini.Load(dirAbsPath + "config.ini")
-    if err != nil {
-		os.WriteFile(dirAbsPath + "config.ini", []byte("# Crops sprites to their edges, set to false for original animation size\ncrop_sprites = true\n\n# Splits sprites by animation when possible\ngroup_by_animation = true\n\n# Close the program without prompting the user when done executing\nclose_when_done = false"), 0644)
+	if err != nil {
+		os.WriteFile(dirAbsPath+"config.ini", []byte("# Crops sprites to their edges, set to false for original animation size\ncrop_sprites = true\n\n# Splits sprites by animation when possible\ngroup_by_animation = true\n\n# Close the program without prompting the user when done executing\nclose_when_done = false"), 0644)
 		cfg, err = ini.Load(dirAbsPath + "config.ini")
 		if err != nil {
 			exit("Could not make config.ini.")
@@ -93,15 +94,15 @@ func main() {
 	} else {
 		filename = os.Args[1]
 	}
-	if(strings.HasSuffix(filename, ".png")) {
+	if strings.HasSuffix(filename, ".png") {
 		filename = filename[0:len(filename)-4] + ".plist"
-	} else if(strings.HasSuffix(filename, "_aniinfo.plist")) {
+	} else if strings.HasSuffix(filename, "_aniinfo.plist") {
 		filename = filename[0:len(filename)-14] + ".plist"
 	}
 	if _, err := os.Stat(filename); errors.Is(err, os.ErrNotExist) {
 		exit("Plist file not found.")
 	}
-    dir := filepath.Dir(filename) + string(os.PathSeparator)
+	dir := filepath.Dir(filename) + string(os.PathSeparator)
 
 	// Start ripping the actual plist
 	plistFile, err := os.ReadFile(filename)
@@ -155,13 +156,13 @@ func main() {
 		}
 		x, _ := strconv.Atoi(rect[0])
 		y, _ := strconv.Atoi(rect[1])
-		img := imaging.Crop(src, image.Rect(x, y, x + width, y + height))
+		img := imaging.Crop(src, image.Rect(x, y, x+width, y+height))
 		if !strings.Contains(key, "/") {
 			key = mainDir + key
 		}
-		newDir := filepath.Dir(key[0:len(key)-len(filepath.Ext(key))])
+		newDir := filepath.Dir(key[0 : len(key)-len(filepath.Ext(key))])
 		if _, err := os.Stat(dirAbsPath + newDir); os.IsNotExist(err) {
-			err = os.MkdirAll(dirAbsPath + newDir, 0644)
+			err = os.MkdirAll(dirAbsPath+newDir, 0644)
 			if err != nil {
 				exit(err.Error())
 			}
@@ -170,7 +171,7 @@ func main() {
 			if element.Rotated {
 				img = imaging.Rotate90(img)
 			}
-			err = imaging.Save(img, dirAbsPath + key)
+			err = imaging.Save(img, dirAbsPath+key)
 			if err != nil {
 				exit(err.Error())
 			}
@@ -192,11 +193,11 @@ func main() {
 			realWidth, _ := strconv.Atoi(realRect[0])
 			realHeight, _ := strconv.Atoi(realRect[1])
 			dst := imaging.New(realWidth, realHeight, color.NRGBA{0, 0, 0, 0})
-			dst = imaging.Paste(dst, img, image.Pt((realWidth - width) / 2 + offsetX, (realHeight - height) / 2 + offsetY * flip))
+			dst = imaging.Paste(dst, img, image.Pt((realWidth-width)/2+offsetX, (realHeight-height)/2+offsetY*flip))
 			if element.Rotated {
 				dst = imaging.Rotate90(dst)
 			}
-			err = imaging.Save(dst, dirAbsPath + key)
+			err = imaging.Save(dst, dirAbsPath+key)
 			if err != nil {
 				exit(err.Error())
 			}
@@ -232,7 +233,7 @@ func main() {
 					if err != nil {
 						exit(err.Error())
 					}
-					err = os.WriteFile(dirAbsPath + filepath.Dir(frameFilename) + string(os.PathSeparator) + strings.ReplaceAll(mainDir, string(os.PathSeparator), "_") + strings.ReplaceAll(key, " ", "_") + "_" + fmt.Sprintf("%04d", i + 1) + filepath.Ext(frameFilename), input, 0644)
+					err = os.WriteFile(dirAbsPath+filepath.Dir(frameFilename)+string(os.PathSeparator)+strings.ReplaceAll(mainDir, string(os.PathSeparator), "_")+strings.ReplaceAll(key, " ", "_")+"_"+fmt.Sprintf("%04d", i+1)+filepath.Ext(frameFilename), input, 0644)
 					if err != nil {
 						exit(err.Error())
 					}
@@ -242,11 +243,11 @@ func main() {
 					if err != nil {
 						exit(err.Error())
 					}
-					err = os.WriteFile(dirAbsPath + mainDir + strings.ReplaceAll(mainDir, string(os.PathSeparator), "_") + strings.ReplaceAll(key, " ", "_") + "_" + fmt.Sprintf("%04d", i + 1) + filepath.Ext(frameFilename), input, 0644)
+					err = os.WriteFile(dirAbsPath+mainDir+strings.ReplaceAll(mainDir, string(os.PathSeparator), "_")+strings.ReplaceAll(key, " ", "_")+"_"+fmt.Sprintf("%04d", i+1)+filepath.Ext(frameFilename), input, 0644)
 					if err != nil {
 						exit(err.Error())
 					}
-					used = append(used, mainDir + frameFilename)
+					used = append(used, mainDir+frameFilename)
 				}
 			}
 		}
