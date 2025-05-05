@@ -70,15 +70,10 @@ var closeWhenDone bool
 
 func main() {
 	// Load config.ini, create it if it doesn't exist
-	ex, err := os.Executable()
+	cfg, err := ini.Load("config.ini")
 	if err != nil {
-		exit(err.Error())
-	}
-	dirAbsPath := filepath.Dir(ex) + string(os.PathSeparator)
-	cfg, err := ini.Load(dirAbsPath + "config.ini")
-	if err != nil {
-		os.WriteFile(dirAbsPath+"config.ini", []byte("# Crops sprites to their edges, set to false for original animation size\ncrop_sprites = true\n\n# Splits sprites by animation when possible\ngroup_by_animation = true\n\n# Close the program without prompting the user when done executing\nclose_when_done = false"), 0644)
-		cfg, err = ini.Load(dirAbsPath + "config.ini")
+		os.WriteFile("config.ini", []byte("# Crops sprites to their edges, set to false for original animation size\ncrop_sprites = true\n\n# Splits sprites by animation when possible\ngroup_by_animation = true\n\n# Close the program without prompting the user when done executing\nclose_when_done = false"), 0644)
+		cfg, err = ini.Load("config.ini")
 		if err != nil {
 			exit("Could not make config.ini.")
 		}
@@ -161,8 +156,8 @@ func main() {
 			key = mainDir + key
 		}
 		newDir := filepath.Dir(key[0 : len(key)-len(filepath.Ext(key))])
-		if _, err := os.Stat(dirAbsPath + newDir); os.IsNotExist(err) {
-			err = os.MkdirAll(dirAbsPath+newDir, 0644)
+		if _, err := os.Stat(newDir); os.IsNotExist(err) {
+			err = os.MkdirAll(newDir, 0644)
 			if err != nil {
 				exit(err.Error())
 			}
@@ -171,7 +166,7 @@ func main() {
 			if element.Rotated {
 				img = imaging.Rotate90(img)
 			}
-			err = imaging.Save(img, dirAbsPath+key)
+			err = imaging.Save(img, key)
 			if err != nil {
 				exit(err.Error())
 			}
@@ -197,7 +192,7 @@ func main() {
 			if element.Rotated {
 				dst = imaging.Rotate90(dst)
 			}
-			err = imaging.Save(dst, dirAbsPath+key)
+			err = imaging.Save(dst, key)
 			if err != nil {
 				exit(err.Error())
 			}
@@ -229,21 +224,21 @@ func main() {
 			for i, frame := range element.FrameList {
 				frameFilename := spritePlistAniinfo.FrameList[frame]
 				if strings.Contains(frameFilename, "/") {
-					input, err := os.ReadFile(dirAbsPath + frameFilename)
+					input, err := os.ReadFile(frameFilename)
 					if err != nil {
 						exit(err.Error())
 					}
-					err = os.WriteFile(dirAbsPath+filepath.Dir(frameFilename)+string(os.PathSeparator)+strings.ReplaceAll(mainDir, string(os.PathSeparator), "_")+strings.ReplaceAll(key, " ", "_")+"_"+fmt.Sprintf("%04d", i+1)+filepath.Ext(frameFilename), input, 0644)
+					err = os.WriteFile(filepath.Dir(frameFilename)+string(os.PathSeparator)+strings.ReplaceAll(mainDir, string(os.PathSeparator), "_")+strings.ReplaceAll(key, " ", "_")+"_"+fmt.Sprintf("%04d", i+1)+filepath.Ext(frameFilename), input, 0644)
 					if err != nil {
 						exit(err.Error())
 					}
 					used = append(used, frameFilename)
 				} else {
-					input, err := os.ReadFile(dirAbsPath + mainDir + frameFilename)
+					input, err := os.ReadFile(mainDir + frameFilename)
 					if err != nil {
 						exit(err.Error())
 					}
-					err = os.WriteFile(dirAbsPath+mainDir+strings.ReplaceAll(mainDir, string(os.PathSeparator), "_")+strings.ReplaceAll(key, " ", "_")+"_"+fmt.Sprintf("%04d", i+1)+filepath.Ext(frameFilename), input, 0644)
+					err = os.WriteFile(mainDir+strings.ReplaceAll(mainDir, string(os.PathSeparator), "_")+strings.ReplaceAll(key, " ", "_")+"_"+fmt.Sprintf("%04d", i+1)+filepath.Ext(frameFilename), input, 0644)
 					if err != nil {
 						exit(err.Error())
 					}
@@ -252,7 +247,7 @@ func main() {
 			}
 		}
 		for _, usedFile := range used {
-			err = os.Remove(dirAbsPath + usedFile)
+			err = os.Remove(usedFile)
 			if err != nil && !os.IsNotExist(err) {
 				exit(err.Error())
 			}
